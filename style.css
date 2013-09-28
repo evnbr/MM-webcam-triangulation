@@ -1,0 +1,87 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+body {
+    font-family: "Plantin Std";
+    font-weight: lighter;
+    color: rgb(91, 91, 151);
+    font-size: 40px;
+    margin: 100px 200px;
+    width: 700px;
+    text-indent:-20px;
+    top: 600px;
+    position: relative;
+}
+#quote {
+    z-index: 9;
+    position: relative;
+}
+path {
+  fill: yellow;
+  stroke: #000;
+}
+line {
+    pointer-events: none;
+    stroke: magenta;
+    stroke-width: 0.2px;
+}
+#grid {
+    position: absolute;
+    top:0px;
+    left:0px;
+}
+#wrapper {
+    width:640px;
+    height:480px;
+    margin: 10px auto;
+    position: absolute;
+    top:100px;
+}
+video {
+    visibility: hidden;
+}
+
+svg {
+    position: absolute;
+    top: 0px;
+    -webkit-transform: scale(1.5);
+    -webkit-transform-origin: top left;
+}
+#grid {
+    visibility: hidden;
+}
+#faceprogress {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    display: block;
+    width: 100%;
+    height: 20px;
+    -webkit-appearance: none;
+}
+
+@media print {
+    .dg.ac {
+        display: none;
+    }
+    body {
+        margin: 0.5in;
+        margin-right: 1in;
+        width: auto;
+        font-size: 80px;
+        text-indent:-40px;
+        color: #582e91;
+    }
+    svg {
+        top: 200px;
+        -webkit-transform: scale(1.5);
+        -webkit-transform-origin: top left;
+    }
+    #grid {
+        visibility: visible;
+        -webkit-transform: translate3d(150px, 450px, 0) scale(1.2);
+        -webkit-transform-origin: top left;
+    }
+}
