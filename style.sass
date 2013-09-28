@@ -1,0 +1,117 @@
+*
+    padding: 0
+    margin: 0
+
+input[type=checkbox]
+    margin-right: 10px
+
+body
+    font-family: "Plantin Std"
+    color: rgb(91, 91, 151)
+    position: relative
+    overflow: hidden
+
+#quote 
+    margin: 100px 200px
+    z-index: 9
+    text-indent: -20px
+    font-weight: lighter
+    position: relative
+    font-size: 40px
+    width: 700px
+
+#wrapper 
+    margin: 10px auto
+    position: relative
+
+#facets 
+    position: absolute
+    top: 0px
+    left: 0px
+    visibility: hidden
+
+video 
+    visibility: hidden
+
+svg 
+    position: absolute
+    top: 0px
+    left: 0px
+    -webkit-transform: scale(1.5)
+    -webkit-transform-origin: top left
+
+#controls
+    height: 100px
+    padding: 2%
+    background: #eee
+    position: relative
+    z-index: 999
+    -webkit-user-select: none
+
+#handle
+    line-height: 50px
+    text-align: center
+    position: absolute
+    bottom: 0
+    left: 0
+    right: 0
+    cursor: -webkit-grab
+    &:hover
+        background: rgba(0,0,0,0.1)
+    &:active
+        background: rgba(255,255,255,0.1)
+        cursor: -webkit-grabbing
+
+
+#faceprogress[value]
+    display: block
+    height: 5px
+    -webkit-appearance: none
+    &::-webkit-progress-bar
+        background: #eee
+    &::-webkit-progress-value
+        background: red
+
+
+
+
+
+// Print Styles
+// ------------
+
+
+@media print 
+    body 
+        margin: 0.5in
+        margin-right: 1in
+        width: auto
+        font-size: 80px
+        text-indent: -40px
+        color: #582e91
+    
+    #controls
+        display: none
+
+    svg 
+        top: 200px
+        -webkit-transform: scale(1.5)
+        -webkit-transform-origin: top left
+    
+    #facets 
+        visibility: visible
+        -webkit-transform: translate3d(150px, 450px, 0) scale(1.2)
+        -webkit-transform-origin: top left
+    
+
+
+// SVG Styles
+// ----------
+
+path 
+    fill: yellow
+    stroke: #000
+
+line 
+    pointer-events: none
+    stroke: magenta
+    stroke-width: 0.2px
