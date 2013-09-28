@@ -14,6 +14,10 @@
 
 
         <style>
+            * {
+                padding: 0;
+                margin: 0;
+            }
             body {
                 font-family: "Plantin Std";
                 font-weight: lighter;
@@ -22,7 +26,8 @@
                 margin: 100px 200px;
                 width: 700px;
                 text-indent:-20px;
-                padding-top: 600px;
+                top: 600px;
+                position: relative;
             }
             #quote {
                 z-index: 9;
@@ -46,12 +51,22 @@
 
             svg {
                 position: absolute;
-                top: 500px;
+                top: 0px;
                 -webkit-transform: scale(1.5);
                 -webkit-transform-origin: top left;
             }
             #grid {
                 visibility: hidden;
+            }
+            #faceprogress {
+                position: fixed;
+                top: 0px;
+                left: 0px;
+                right: 0px;
+                display: block;
+                width: 100%;
+                height: 20px;
+                -webkit-appearance: none;
             }
 
             @media print {
@@ -111,13 +126,12 @@
             <canvas id="canvas" style="visibility: hidden"></canvas>
         </div>
 
-        <script type="text/javascript" src="jsfeat/build/jsfeat-min.js"></script>
-        <script type="text/javascript" src="jsfeat/cascades/bbf_face.js"></script>
-        <script type="text/javascript" src="dat-gui/build/dat.gui.min.js"></script>
-        <script type="text/javascript" src="delaunay/delaunay.js"></script>
-        <script type="text/javascript" src="prefixfree/prefixfree.js"></script>
-        <script type="text/javascript" src="js/compatibility.js"></script>
-        <script type="text/javascript" src="js/profiler.js"></script>
+        <script type="text/javascript" src="jsfeat-min.js"></script>
+        <script type="text/javascript" src="bbf_face.js"></script>
+        <script type="text/javascript" src="delaunay.js"></script>
+        <script type="text/javascript" src="prefixfree.js"></script>
+        <script type="text/javascript" src="compatibility.js"></script>
+        <script type="text/javascript" src="profiler.js"></script>
         <script src="http://d3js.org/d3.v3.min.js"></script>
         <script type="text/javascript">
 
@@ -205,8 +219,9 @@
                     img_u8 = new jsfeat.matrix_t(cwidth, cheight, jsfeat.U8_t | jsfeat.C1_t);
                     canvas.width = cwidth;
                     canvas.height = cheight;
-                    var style = 'visibility: hidden;transform:scale('+1/resolution+')';                   
-                    canvas['style'] = PrefixFree.prefixCSS(style);
+                    var style = 'visibility: hidden; -webkit-transform: scale('+1/resolution+')';                   
+                    //canvas['style'] = PrefixFree.prefixCSS(style);
+                    canvas['style'] = style;
                     gridCtx.setTransform(1/resolution,0,0,1/resolution,0,0);
                     corners = [];
                     var i = cwidth*cheight;
