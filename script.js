@@ -2,8 +2,33 @@
 
         var video = document.getElementById('webcam');
         var canvas = document.getElementById('canvas');
-        var grid = document.getElementById('grid');
+        var grid = document.getElementById('facets');
         var log = document.getElementById('log');
+
+
+        var handle = document.getElementById("handle");
+        var controls = document.getElementById("controls");
+        var mouse_initial = 0;
+        var control_height = 100;
+        var mouse_dragging = false;
+        handle.addEventListener("mousedown", function(e){
+            mouse_initial = e.y;
+            mouse_dragging = true;
+        }, false);
+        document.addEventListener("mousemove", function(e){
+            if (mouse_dragging) {
+                mouse_delta = -1 * (mouse_initial - e.y);
+                controls.style.height = mouse_delta + control_height + "px";
+                console.log(controls.style.height);
+            }
+        }, false);
+        document.addEventListener("mouseup", function(e){
+            if (mouse_dragging) {
+                mouse_dragging = false;
+                control_height = mouse_delta + control_height;
+            }
+
+        }, false);
 
 
         try {
@@ -175,9 +200,7 @@
                 function getTriangleColor(img,triangle) {
                     var getColor = function (point) {
                         var offset = (point.x+point.y*cwidth)*4;
-                        return {    r:img.data[offset],
-                                    g:img.data[offset+1],
-                                    b:img.data[offset+2]  };
+                        return img.data[offset];
                     }
                     var midPoint = function (point1,point2) {
                         return {x:(point1.x+point2.x)/2,
@@ -206,11 +229,11 @@
                     var color = triangles[i].color = getTriangleColor(imageData,triangles[i]);
 
                     var blueness = 255;
-                    if (color.b < 125) blueness -= (125 - color.b);
+                    if (color < 125) blueness -= (125 - color);
 
                     gridCtx.fillStyle = 'rgba('+
                         blueness+','+
-                        color.g+','+
+                        color+','+
                         255+','+
                         0.8 + ')';
 
@@ -226,7 +249,7 @@
                     // gridCtx.stroke();
 
                     gridCtx.fill();
-                    gridCtx.fillStyle = 'rgb(255,255,255)';
+                    //gridCtx.fillStyle = 'rgb(255,255,255)';
                     //gridCtx.fillRect(triangles[i].a.x,triangles[i].a.y, 1, 1);
                 }
 
@@ -293,7 +316,7 @@
     var sc = 4;
     var width = 1200,
         height = 800;
-    var svg = d3.select("body").append("svg")
+    var svg = d3.select("#wrapper").append("svg")
         .attr("width", width)
         .attr("height", height);
     var d3_geom_voronoi = d3.geom.voronoi().x(function(d) { return d.x; }).y(function(d) { return d.y; })
