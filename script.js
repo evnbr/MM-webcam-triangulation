@@ -1,4 +1,96 @@
-    window.addEventListener("load",function() {
+    var app_options = {
+        printing_enabled: false,
+        face_step_fwd: 0,
+        face_step_bwd: 0,
+        now_playing: false
+    };
+    var child = make_child_window();
+    child.addEventListener("load",function() {
+        window.onunload = function() {
+            if (child && !child.closed) {
+                child.close();
+            }
+        };
+
+
+        // Options
+        // -------
+        (function(){
+
+            var handle = document.getElementById("handle");
+            var controls = document.getElementById("controls");
+            var mouse_initial = 0;
+            var control_height = 100;
+            var mouse_dragging = false;
+            handle.addEventListener("mousedown", function(e){
+                mouse_initial = e.y;
+                mouse_dragging = true;
+            }, false);
+            document.addEventListener("mousemove", function(e){
+                if (mouse_dragging) {
+                    mouse_delta = -1 * (mouse_initial - e.y);
+                    controls.style.height = mouse_delta + control_height + "px";
+                    console.log(controls.style.height);
+                }
+            }, false);
+            document.addEventListener("mouseup", function(e){
+                if (mouse_dragging) {
+                    mouse_dragging = false;
+                    control_height = mouse_delta + control_height;
+                }
+
+            }, false);
+
+
+
+            var printingcheckbox = document.getElementById("enableprint");
+            printingcheckbox.addEventListener("click", function(cb){
+                app_options.printing_enabled = this.checked;
+            }, false);
+
+
+            var facetscheckbox = document.getElementById("enablevideo");
+            var facets = document.getElementById("facets");
+            facetscheckbox.addEventListener("click", function(cb){
+                if (this.checked) {
+                    facets.style.visibility = "visible";
+                }
+                else facets.style.visibility = "";
+            }, false);
+
+
+            var facestepsliderfwd = document.getElementById("facestepsliderfwd");
+            facestepsliderfwd.addEventListener("change", function(slider){
+                app_options.face_step_fwd = parseFloat(this.value);
+            }, false);
+
+            var facestepsliderbwd = document.getElementById("facestepsliderbwd");
+            facestepsliderbwd.addEventListener("change", function(slider){
+                app_options.face_step_bwd = parseFloat(this.value);
+            }, false);
+
+
+            var playpause = document.getElementById("playpause");
+            playpause.addEventListener("click", function(cb){
+                if (app_options.now_playing) {
+                    app_options.now_playing = false;
+                    playpause.innerHTML = "Start";
+                }
+                else {
+                    app_options.now_playing = true;
+                    playpause.innerHTML = "Pause";
+                    tick();
+                    changeQuote();
+                }
+            }, false);
+
+
+            app_options.face_step_fwd = parseFloat(facestepsliderfwd.value);
+            app_options.face_step_bwd = parseFloat(facestepsliderbwd.value);
+            app_options.printing_enabled = printingcheckbox.checked;
+
+        })();
+
 
         var video = document.getElementById('webcam');
         var canvas = document.getElementById('canvas');
@@ -6,29 +98,6 @@
         var log = document.getElementById('log');
 
 
-        var handle = document.getElementById("handle");
-        var controls = document.getElementById("controls");
-        var mouse_initial = 0;
-        var control_height = 100;
-        var mouse_dragging = false;
-        handle.addEventListener("mousedown", function(e){
-            mouse_initial = e.y;
-            mouse_dragging = true;
-        }, false);
-        document.addEventListener("mousemove", function(e){
-            if (mouse_dragging) {
-                mouse_delta = -1 * (mouse_initial - e.y);
-                controls.style.height = mouse_delta + control_height + "px";
-                console.log(controls.style.height);
-            }
-        }, false);
-        document.addEventListener("mouseup", function(e){
-            if (mouse_dragging) {
-                mouse_dragging = false;
-                control_height = mouse_delta + control_height;
-            }
-
-        }, false);
 
 
         try {
@@ -50,11 +119,9 @@
         } catch (error) {
             log.innerHTML = '<h4>Fatal Error.</h4>';
         }
-        
 
-        var app_options = {
-            printing_enabled: false
-        };
+
+
 
 
         var stat = new profiler();
@@ -67,10 +134,6 @@
             this.resolution = 0.3;
             this.draw_borders = false;
         }
-
-
-
-
 
 
         function demo_app() {
@@ -96,11 +159,6 @@
                 }
             }
 
-            //var resctl = gui.add(options, 'resolution', 0.1, 1.0).step(0.1);
-            //resctl.onFinishChange(function(value){
-            //    setResolution(value);
-            //});
-            //gui.add(options, 'draw_borders');
 
             stat.add("capture");
             stat.add("grayscale");
@@ -119,9 +177,8 @@
                     
         function tick() {
             
-            //setTimeout(function(){
-                compatibility.requestAnimationFrame(tick);
-            //}, 300);
+            if (app_options.now_playing) compatibility.requestAnimationFrame(tick);
+
             stat.new_frame();
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
                 var cwidth = Math.floor(640*options.resolution);
@@ -134,9 +191,7 @@
                 // ----------
 
                 stat.start("capture");
-                // ctx.globalAlpha = 0.1;
                 ctx.drawImage(video, 0, 0, cwidth, cheight);
-                // ctx.globalAlpha = 1;
                 var imageData = ctx.getImageData(0, 0, cwidth, cheight);
                 stat.stop("capture");
 
@@ -218,8 +273,8 @@
 
                 stat.start("rendering");
 
-                var face_w = draw_faces(gridCtx, rects, cwidth/img_u8.cols, 1);
-                face_detected_update(face_w > 0);
+                var face_w = draw_faces(gridCtx, rects, cwidth/img_u8.cols, 1, canvas.width);
+                face_detected_update(face_w);
 
                 gridCtx.scale(-1, 1);
                 gridCtx.fillStyle = 'rgb(255,255,255)';
@@ -266,12 +321,164 @@
 
 
 
+
+
+
+        // D3 
+        // -------
+
+        var sc = 4;
+        var width = 1200,
+            height = 800;
+        //var svg = d3.select("#wrapper").append("svg")
+        var svg = d3.selectAll([document.getElementById("#wrapper"), child.document.body]).append("svg")
+            .attr("id", "meshsvg")
+            .attr("width", width)
+            .attr("height", height);
+        var d3_geom_voronoi = d3.geom.voronoi().x(function(d) { return d.x; }).y(function(d) { return d.y; })
+        var link = svg.selectAll("line");
+
+       function update_d3(nodes) {
+
+            link = link.data(d3_geom_voronoi.links(nodes))
+            link.enter().append("line")
+            link
+                .attr("x1", function(d) { return d.source.x * sc; })
+                .attr("y1", function(d) { return d.source.y * sc; })
+                .attr("x2", function(d) { return d.target.x * sc; })
+                .attr("y2", function(d) { return d.target.y * sc; })
+
+            link.exit().remove()
+       }
+
+
+
+
+
+
+
+
+        // Quotes
+        // ------
+
+        var quotes = [
+            ' “It’s constant movement, only it’s bigger, and it has more of a purpose. And it’s trying to figure out what the purpose is that interests me.” ',
+            ' “I like to look at what everyone is doing, find some common thing they’re all assuming, implicitly, but they don’t even realize they’re assuming, and then negate that thing.” ',
+            ' “I think there’s some deeper-seated thing in understanding life by building something that is lifelike.” ',
+            ' “I sort of this joke theory that consciousness was put there by God so he has this quick interface to find out what we’re thinking about.” ',
+            ' “In its ultimate form all of this stuff is looking at other ... That feeling that you are in the presence of life that would exist irrelevant of yourself.” ',
+            ' “The whole concept of stability is a concept of death. You’re either prey, you’re an an enemy, or ignored.” ',
+            ' “Together, they performed some global task, much bigger than the sum of the parts.” ',
+            ' “There is a moment of contact — I know you are. You know I am. <br/> It’s not something that happens everyday. You have to go out and look for it.” ',
+            ' “You know people are afraid of new, different, strange, but to me it isn’t anything to be feared. It’s something to be wondered at, and looked at, and explored... Perhaps communicated with...” ',
+            ' “You’re fighting the elements to try and get them to grow where you want them to grow, get them to do what you want them to do. It’s a constant battle all the time.” ',
+            ' “You have to experience an injury. You have to experience chaos.” ',
+            ' “Given a particular set of rules, what is the global behavior that emerges when you put them together? And the other way around, if you want a group task done, how can you synthesize a set of rules that will cause that task to happen?” ',
+            ' “The only consciousness we’ve ever experienced is our own. I know I’m conscious, but I don’t know about anyone else.” ',
+            ' “People just come and look. You wonder what they’re looking at.”  ',
+            ' “Everything we think, everything in our thought processes is built around being in touch with reality. Even the word ‘touch’...” ',
+            ' “Never let that bluff down.” ',
+            ' “Just feel the force. Don’t try and control the robot, but feel how the world is going to control the robot.” ',
+        ];
+
+        var childquote = child.document.getElementById('quote');
+
+        changeQuote();
+        function changeQuote() {
+            var newquote = quotes[Math.floor(Math.random() * quotes.length)];
+            childquote.innerHTML = newquote;
+            if(app_options.now_playing) setTimeout(changeQuote, Math.random()* 300 + 50);
+        }
+
+
+
+        // Facial progress bar
+        // ------------
+        var progress = document.getElementById("faceprogress");
+        var facesizeprogress = document.getElementById("facesizeprogress");
+        var datetime = document.getElementById('datetime');
+        var title = document.getElementById('title');
+        var face_log = document.getElementById("facesizelog");
+        var progress_value = 0;
+        var progress_max = 100;
+        var printer_paused = false;
+        function face_detected_update(face_w) {
+
+            var there_is_a_face = (face_w > 0.05 && !printer_paused);
+
+            if (there_is_a_face) progress_value += app_options.face_step_fwd;
+            else progress_value -= app_options.face_step_bwd;
+
+            if (progress_value < 0) progress_value = 0;
+            else if (progress_value > progress_max) {
+                progress_value = 0;
+
+
+                // Randomize positions
+                // -------------------
+
+                facets.style.top = (Math.random() * 5 + 4) + "in";
+                facets.style.right = (Math.random() * 2) + "in";
+                datetime.innerHTML = moment().format('h:mm:ss A — D MMMM YYYY');
+
+                datetime.style.left = (Math.random() * 6.5) + "in";
+                title.style.left = (Math.random() * 6.5) + "in";
+
+                datetime.style.top = (Math.random() * 2 + 12) + "in";
+                title.style.top = (Math.random() * 0.7) + "in";
+
+
+                // Replace SVG from child window
+                // -----------------------------
+                var tempsvg = document.getElementById("meshsvg");
+                var childsvg = child.document.getElementById("meshsvg");
+
+                if (childsvg) {
+                    if (tempsvg) {
+                        tempsvg.parentNode.replaceChild(childsvg.cloneNode(), tempsvg);
+                    }
+                    else {
+                        document.getElementById("wrapper").appendChild(childsvg.cloneNode());
+                    }
+                }
+
+
+                // Replace quote from child window
+                // -------------------------------
+                document.getElementById("quote").innerHTML = childquote.innerHTML;
+
+                // Print, if appropriate
+                // ---------------------
+                if (app_options.printing_enabled) window.print();
+                else console.log("(printing!)");
+
+
+                // Set printer-throttling timer
+                // ----------------------------
+                printer_paused = true;
+                faceprogress.className = "paused";
+                setTimeout(function(){
+                    printer_paused = false;
+                    faceprogress.className = "";
+                }, 40 * 1000); // 40 second throttler
+
+            } 
+            progress.setAttribute("value", progress_value);
+            facesizeprogress.setAttribute("value", face_w);
+        }
+        face_detected_update(false);
+
+
+
+
+
+    // End window
     },false);
 
 
 
 
-    function draw_faces(ctx, rects, sc, max) {
+    function draw_faces(ctx, rects, sc, max, cwid) {
         var on = rects.length;
         if(on && max) {
             jsfeat.math.qsort(rects, 0, on-1, function(a,b){return (b.confidence<a.confidence);})
@@ -281,82 +488,47 @@
         var r;
         for(var i = 0; i < n; ++i) {
             r = rects[i];
-            ctx.strokeRect((r.x*sc)|0,(r.y*sc)|0,(r.width*sc)|0,(r.height*sc)|0);
+            ctx.strokeRect(
+                (cwid - r.x*sc - r.width*sc)|0,
+                (r.y*sc)|0,
+                (r.width*sc)|0,
+                (r.height*sc)|0
+            );
 
-            return range_to_01(r.width, [24,60]);
+            return range_to_one(r.width, [22,60]);
         }
     }
 
 
-    // Facial progress bar
-    // ------------
-    var progress = document.getElementById("faceprogress");
-    var progress_value = 0;
-    var progress_max = 100;
-    function face_detected_update(there_is_a_face) {
-        if (there_is_a_face) progress_value += 2;
-        else progress_value -= 0.4;
 
-        if (progress_value < 0) progress_value = 0;
-        else if (progress_value > progress_max) {
-            progress_value = 0;
-            if (app_options.printing_enabled) window.print();
-            else console.log("(printing!)");
-        } 
-        progress.setAttribute("value", progress_value);
+
+    // Make Child Window
+    // -----------------
+
+
+    function make_child_window() {
+        var url = "http://localhost:8000/child.html";
+        var width = 1200;
+        var height = 800;
+        var left = parseInt((screen.availWidth/2) - (width/2));
+        var top = parseInt((screen.availHeight/2) - (height/2));
+        var windowFeatures = "width=" + width + ",height=" + height +   
+            ",status,resizable,left=" + left + ",top=" + top + 
+            "screenX=" + left + ",screenY=" + top + ",scrollbars=yes";
+
+        return window.open(url, "subWind", windowFeatures, "POS");
     }
-    face_detected_update(false);
 
 
 
 
-    // D3 
-    // -------
-
-    var sc = 4;
-    var width = 1200,
-        height = 800;
-    var svg = d3.select("#wrapper").append("svg")
-        .attr("width", width)
-        .attr("height", height);
-    var d3_geom_voronoi = d3.geom.voronoi().x(function(d) { return d.x; }).y(function(d) { return d.y; })
-    var link = svg.selectAll("line");
-
-   function update_d3(nodes) {
-
-        link = link.data(d3_geom_voronoi.links(nodes))
-        link.enter().append("line")
-        link
-            .attr("x1", function(d) { return d.source.x * sc; })
-            .attr("y1", function(d) { return d.source.y * sc; })
-            .attr("x2", function(d) { return d.target.x * sc; })
-            .attr("y2", function(d) { return d.target.y * sc; })
-
-        link.exit().remove()
-   }
 
 
-    // Quotes
-    // ------
 
-    (function(){
-        var quotes = [
-            ' “It’s constant movement, only it’s bigger, and it has more of a purpose. And it’s trying to figure out what the purpose is that interests me.” ',
-            ' “I like to look at what everyone is doing, find some common thing they’re all assuming, implicitly, but they don’t even realize they’re assuming, and then negate that thing.” ',
-            ' “I think there’s some deeper-seated thing ... in understanding life by building something that is lifelike.” ',
-            ' “I sort of this joke theory that consciousness was put there by God so he has this quick interface to find out what we’re thinking about.” ',
-            ' “In its ultimate form all of this stuff is looking at other ... That feeling that you are in the presence of life that would exist irrelevant of yourself.” ',
-            ' “The whole concept of stability is a concept of death. You’re either prey, you’re an an enemy, or ignored.” '
-        ];
 
-        var quote = document.getElementById('quote');
 
-        changeQuote();
-        function changeQuote() {
-            quote.innerHTML = quotes[Math.floor(Math.random() * quotes.length)];
-            setTimeout(changeQuote, Math.random()* 200 + 50);
-        }
-    })();
+
+
 
 
 
@@ -372,11 +544,11 @@
         return ( ( (out[1] - out[0])*(x - inp[0]) ) / (inp[1] - inp[0]) + out[0] );
     }
 
-    function normal_to_range (x, output_range) {
+    function one_to_range (x, output_range) {
         return range_to_range(x, [0,1], output_range);
     }
 
-    function range_to_01 (x, input_range) {
+    function range_to_one (x, input_range) {
         return range_to_range(x, input_range, [0,1]);
     }
 

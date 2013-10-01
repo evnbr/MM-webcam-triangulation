@@ -11,6 +11,13 @@ body {
   position: relative;
   overflow: hidden; }
 
+@-webkit-keyframes colorchange {
+  0% {
+    color: #5b5b97; }
+
+  100% {
+    color: #5b5b97; } }
+
 #quote {
   margin: 100px 200px;
   z-index: 9;
@@ -18,7 +25,8 @@ body {
   font-weight: lighter;
   position: relative;
   font-size: 40px;
-  width: 700px; }
+  width: 700px;
+  -webkit-animation: colorchange 20s infinite; }
 
 #wrapper {
   margin: 10px auto;
@@ -62,36 +70,112 @@ svg {
     background: rgba(255, 255, 255, 0.1);
     cursor: -webkit-grabbing; }
 
-#faceprogress[value] {
+.col {
+  display: inline-block;
+  border-right: 1px dotted white;
+  padding-right: 50px;
+  margin-right: 50px;
+  vertical-align: top; }
+  .col:last-child {
+    border-right: 0; }
+
+label {
   display: block;
-  height: 5px;
-  -webkit-appearance: none; }
-  #faceprogress[value]::-webkit-progress-bar {
-    background: #eeeeee; }
-  #faceprogress[value]::-webkit-progress-value {
-    background: red; }
+  line-height: 20px;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: Akkurat; }
+
+progress[value], input[type="range"] {
+  -webkit-appearance: none !important;
+  margin-right: 20px;
+  height: 2px;
+  width: 300px;
+  background: #dddddd; }
+  progress[value]:focus, input[type="range"]:focus {
+    outline: none; }
+
+@-webkit-keyframes countdown {
+  0% {
+    background: magenta;
+    width: 300px; }
+
+  100% {
+    width: 0px; } }
+
+progress[value] {
+  height: 2px; }
+  progress[value]::-webkit-progress-bar {
+    background: #dddddd; }
+  progress[value]::-webkit-progress-value {
+    background: blue; }
+  progress[value].paused::-webkit-progress-bar {
+    -webkit-animation: countdown 40s 1; }
+
+#facesizeprogress::-webkit-progress-value {
+  background: #999999; }
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+
+.labeltext {
+  display: none;
+  font-size: 18px;
+  font-family: "Apercu Mono", monospace;
+  position: absolute; }
+
+#title {
+  color: purple; }
+
+#datetime {
+  color: magenta; }
+
+#playpause {
+  padding: 4px 20px;
+  margin-bottom: 10px; }
 
 @media print {
   body {
-    margin: 0.5in;
-    margin-right: 1in;
+    margin: 0;
+    height: 10in;
+    border: 1px solid transparent; }
+
+  #wrapper {
+    height: 10in;
+    border: 1px solid transparent; }
+
+  .labeltext {
+    display: block; }
+
+  #quote {
+    margin: 1.5in 1in 0.8in 0.8in;
     width: auto;
-    font-size: 80px;
-    text-indent: -40px;
+    font-size: 70px;
+    text-indent: -35px;
     color: #582e91; }
 
   #controls {
     display: none; }
 
   svg {
-    top: 200px;
-    -webkit-transform: scale(1.5);
-    -webkit-transform-origin: top left; }
+    top: 1.8in;
+    -webkit-transform: scale(1.5); }
 
   #facets {
     visibility: visible;
-    -webkit-transform: translate3d(150px, 450px, 0) scale(1.2);
-    -webkit-transform-origin: top left; } }
+    top: auto;
+    left: auto;
+    bottom: 3in;
+    right: 1in;
+    z-index: -1;
+    -webkit-transform: scale(1.4); } }
 path {
   fill: yellow;
   stroke: black; }

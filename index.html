@@ -17,12 +17,26 @@
     <body>
 
         <div id="controls">
-            <label><input type="checkbox" />Enable printing</label>
-            <progress id="faceprogress" max="100" value="50"></progress>
-            <div id="log"></div>
             <div id="handle">...</div>
+
+            <div class="col">
+                <button id="playpause">Start</button>
+                <label><input id="enableprint" type="checkbox" unchecked />Real printing</label>
+                <label><input id="enablevideo" type="checkbox" unchecked />Show video</label>
+                <div id="log"></div>
+            </div>
+            <div class="col">
+                <label><input id="facestepsliderfwd" type="range" max="4" step="0.05" value="2" />Step fwd</label>
+                <label><input id="facestepsliderbwd" type="range" max="4" step="0.05" value="0.2" />Step bwd</label>
+                <label><progress id="facesizeprogress" max="1" value="0"></progress>Face Size</label>
+                <label><progress id="faceprogress" max="100" value="50"></progress>Face progress</label>
+            </div>
+
         </div>
 
+
+        <div class="labeltext" id="title">Fast, Cheap, and Out of Control</div>
+        <div class="labeltext" id="datetime">Anyone have the time?</div>
 
         <div id="wrapper">
 
@@ -35,9 +49,11 @@
             <canvas id="canvas" style="visibility: hidden"></canvas>
         </div>
 
+
         <script type="text/javascript" src="jsfeat-min.js"></script>
         <script type="text/javascript" src="bbf_face.js"></script>
         <script type="text/javascript" src="delaunay.js"></script>
+        <script type="text/javascript" src="moment.js"></script>
         <script type="text/javascript" src="compatibility.js"></script>
         <script type="text/javascript" src="profiler.js"></script>
         <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
