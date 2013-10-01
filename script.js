@@ -369,7 +369,7 @@
             ' “In its ultimate form all of this stuff is looking at other ... That feeling that you are in the presence of life that would exist irrelevant of yourself.” ',
             ' “The whole concept of stability is a concept of death. You’re either prey, you’re an an enemy, or ignored.” ',
             ' “Together, they performed some global task, much bigger than the sum of the parts.” ',
-            ' “There is a moment of contact — I know you are. You know I am. <br/> It’s not something that happens everyday. You have to go out and look for it.” ',
+            ' “There is a moment of contact— I know you are. You know I am. It’s not something that happens everyday. You have to go out and look for it.” ',
             ' “You know people are afraid of new, different, strange, but to me it isn’t anything to be feared. It’s something to be wondered at, and looked at, and explored... Perhaps communicated with...” ',
             ' “You’re fighting the elements to try and get them to grow where you want them to grow, get them to do what you want them to do. It’s a constant battle all the time.” ',
             ' “You have to experience an injury. You have to experience chaos.” ',
@@ -387,7 +387,7 @@
         function changeQuote() {
             var newquote = quotes[Math.floor(Math.random() * quotes.length)];
             childquote.innerHTML = newquote;
-            if(app_options.now_playing) setTimeout(changeQuote, Math.random()* 300 + 50);
+            // if(app_options.now_playing) setTimeout(changeQuote, Math.random()* 300 + 50);
         }
 
 
@@ -404,10 +404,19 @@
         var printer_paused = false;
         function face_detected_update(face_w) {
 
-            var there_is_a_face = (face_w > 0.05 && !printer_paused);
+            // var there_is_a_face = (face_w > 0.05 && !printer_paused);
 
-            if (there_is_a_face) progress_value += app_options.face_step_fwd;
-            else progress_value -= app_options.face_step_bwd;
+            if (face_w > 0.05) {
+                changeQuote();
+
+                if (!printer_paused) {
+                    progress_value += app_options.face_step_fwd;
+                }
+                else {
+                    progress_value -= app_options.face_step_bwd;
+                }
+            }
+
 
             if (progress_value < 0) progress_value = 0;
             else if (progress_value > progress_max) {
