@@ -337,18 +337,34 @@
             .attr("height", height);
         var d3_geom_voronoi = d3.geom.voronoi().x(function(d) { return d.x; }).y(function(d) { return d.y; })
         var link = svg.selectAll("line");
+        var facerect = svg.selectAll("rect");
 
        function update_d3(nodes) {
 
-            link = link.data(d3_geom_voronoi.links(nodes))
+            link = link.data(d3_geom_voronoi.links(nodes));
             link.enter().append("line")
             link
-                .attr("x1", function(d) { return d.source.x * sc; })
-                .attr("y1", function(d) { return d.source.y * sc; })
-                .attr("x2", function(d) { return d.target.x * sc; })
-                .attr("y2", function(d) { return d.target.y * sc; })
+                .attr("x1", function(d) { return 750 - (d.source.x * sc); })
+                .attr("y1", function(d) { return 50 + (d.source.y * sc); })
+                .attr("x2", function(d) { return 750 - (d.target.x * sc); })
+                .attr("y2", function(d) { return 50 + (d.target.y * sc); });
+            link.exit().remove();
+       }
 
-            link.exit().remove()
+       function update_d3_face(facearray) {
+
+            facerect = facerect.data(facearray);
+            facerect.enter().append("rect")
+            facerect.transition()
+                .attr("x", function(d) { return d.x * sc; })
+                .attr("y", function(d) { return d.y * sc; })
+                .attr("width", function(d) { return d.w * sc; })
+                .attr("height", function(d) { return d.h * sc; })
+                .attr("rx", function(d) { return d.w/2 * sc; })
+                .attr("ry", function(d) { return d.h/2 * sc; });
+            facerect.exit().remove();
+
+            // console.log(facerect);
        }
 
 
@@ -469,7 +485,7 @@
                 setTimeout(function(){
                     printer_paused = false;
                     faceprogress.className = "";
-                }, 40 * 1000); // 40 second throttler
+                }, 45 * 1000); // 45 second throttler
 
             } 
             progress.setAttribute("value", progress_value);
@@ -480,33 +496,43 @@
 
 
 
+        function draw_faces(ctx, rects, sc, max, cwid) {
+            var on = rects.length;
+            if(on && max) {
+                jsfeat.math.qsort(rects, 0, on-1, function(a,b){return (b.confidence<a.confidence);})
+            }
+            var n = max || on;
+            n = Math.min(n, on);
+            var r;
+            for(var i = 0; i < n; ++i) {
+                r = rects[i];
+                ctx.strokeRect(
+                    (cwid - r.x*sc - r.width*sc)|0,
+                    (r.y*sc)|0,
+                    (r.width*sc)|0,
+                    (r.height*sc)|0
+                );
 
+                // update_d3_face([{
+                //     x: (cwid - r.x*sc - r.width*sc)|0,
+                //     y: (r.y*sc)|0,
+                //     w: (r.width*sc)|0,
+                //     h: (r.height*sc)|0
+                // }]);
+
+                return range_to_one(r.width, [22,60]);
+            }
+
+            // update_d3_face([]);
+
+        }
     // End window
     },false);
 
 
 
 
-    function draw_faces(ctx, rects, sc, max, cwid) {
-        var on = rects.length;
-        if(on && max) {
-            jsfeat.math.qsort(rects, 0, on-1, function(a,b){return (b.confidence<a.confidence);})
-        }
-        var n = max || on;
-        n = Math.min(n, on);
-        var r;
-        for(var i = 0; i < n; ++i) {
-            r = rects[i];
-            ctx.strokeRect(
-                (cwid - r.x*sc - r.width*sc)|0,
-                (r.y*sc)|0,
-                (r.width*sc)|0,
-                (r.height*sc)|0
-            );
 
-            return range_to_one(r.width, [22,60]);
-        }
-    }
 
 
 

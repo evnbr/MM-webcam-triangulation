@@ -185,3 +185,8 @@ line {
   pointer-events: none;
   stroke: magenta;
   stroke-width: 0.2px; }
+
+rect {
+  fill: rgba(255, 0, 255, 0);
+  stroke: purple;
+  stroke-width: 0px; }
